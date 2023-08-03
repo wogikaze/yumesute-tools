@@ -259,35 +259,41 @@ img = images[1]
 img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 skill_gray = cv.cvtColor(skill_img, cv.COLOR_BGR2GRAY)
 
-print('グレースケール画像')
+print("グレースケール画像")
 # imgshow([img_gray, skill_gray])
 
 res = cv.matchTemplate(img_gray, skill_gray, cv.TM_CCOEFF_NORMED)
 min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
-print('\nテンプレートマッチ結果')
+print("\nテンプレートマッチ結果")
 print(min_val, max_val, min_loc, max_loc)
 
 # 類似度が最も高い場所を赤枠で囲ってみる
 tmp_img = img.copy()
-cv.rectangle(tmp_img, pt1=(max_loc[0], max_loc[1]), pt2=(
-    max_loc[0] + skill_img.shape[1], max_loc[1] + skill_img.shape[0]), color=(0, 0, 255), thickness=2)
-print('\n類似度が最も高い場所')
+cv.rectangle(
+    tmp_img,
+    pt1=(max_loc[0], max_loc[1]),
+    pt2=(max_loc[0] + skill_img.shape[1], max_loc[1] + skill_img.shape[0]),
+    color=(0, 0, 255),
+    thickness=2,
+)
+print("\n類似度が最も高い場所")
 # imgshow(tmp_img)
 
 # 結合用に切り抜いてみる
-clip_img = img[max_loc[1] + skill_gray.shape[0]: margin_bottom, :]
-print('\n結合用に切り抜き')
+clip_img = img[max_loc[1] + skill_gray.shape[0] : margin_bottom, :]
+print("\n結合用に切り抜き")
 # imgshow(clip_img)
 
 clip_imgs = []
 # 1枚目
-clip_imgs.append(images[0][: margin_bottom, :])
+clip_imgs.append(images[0][:margin_bottom, :])
 # 2枚目
 clip_imgs.append(clip_img)
 
 # 2枚目のスキル画像
-skill_img = images[1][margin_bottom -
-                      skill_height: margin_bottom, margin_left: skill_right]
+skill_img = images[1][
+    margin_bottom - skill_height : margin_bottom, margin_left:skill_right
+]
 
 # 3枚目
 img = images[2]
@@ -296,24 +302,29 @@ img = images[2]
 img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 skill_gray = cv.cvtColor(skill_img, cv.COLOR_BGR2GRAY)
 
-print('グレースケール画像')
+print("グレースケール画像")
 # imgshow([img_gray, skill_gray])
 
 res = cv.matchTemplate(img_gray, skill_gray, cv.TM_CCOEFF_NORMED)
 min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
-print('\nテンプレートマッチ結果')
+print("\nテンプレートマッチ結果")
 print(min_val, max_val, min_loc, max_loc)
 
 # 類似度が最も高い場所を赤枠で囲ってみる
 tmp_img = img.copy()
-cv.rectangle(tmp_img, pt1=(max_loc[0], max_loc[1]), pt2=(
-    max_loc[0] + skill_img.shape[1], max_loc[1] + skill_img.shape[0]), color=(0, 0, 255), thickness=2)
-print('\n類似度が最も高い場所')
+cv.rectangle(
+    tmp_img,
+    pt1=(max_loc[0], max_loc[1]),
+    pt2=(max_loc[0] + skill_img.shape[1], max_loc[1] + skill_img.shape[0]),
+    color=(0, 0, 255),
+    thickness=2,
+)
+print("\n類似度が最も高い場所")
 # imgshow(tmp_img)
 
 # 結合用に切り抜いてみる
-clip_img = img[max_loc[1] + skill_gray.shape[0]: margin_bottom, :]
-print('\n結合用に切り抜き')
+clip_img = img[max_loc[1] + skill_gray.shape[0] : margin_bottom, :]
+print("\n結合用に切り抜き")
 # imgshow(clip_img)
 
 clip_imgs.append(clip_img)
@@ -324,12 +335,13 @@ height = sum(m.shape[0] for m in clip_imgs)
 output_img = np.zeros((height, width, 3), dtype=np.uint8)
 y = 0
 for clip_img in clip_imgs:
-    output_img[y: y + clip_img.shape[0], 0: clip_img.shape[1]] = clip_img
+    output_img[y : y + clip_img.shape[0], 0 : clip_img.shape[1]] = clip_img
     y += clip_img.shape[0]
-print('結合結果')
+print("結合結果")
 # imgshow(output_img)
 
 print(margin_left, margin_right)
 
-clip_img = output_img[:, margin_left: margin_right]
-imgshow(clip_img)
+clip_img = output_img[:, margin_left:margin_right]
+# imgshow(clip_img)
+_ = cv.imwrite("vertical.png", clip_img)
