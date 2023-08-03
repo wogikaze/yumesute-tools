@@ -86,6 +86,8 @@ def simple_merge(images: list, layout: SimpleMergeLayout):
     return output_img
 
 
+BLACK = 0
+WHITE = 255
 # 結合対象画像をlistへ格納
 images = []
 
@@ -100,11 +102,205 @@ for i in np.arange(3):
             raise Exception("異なる解像度の画像が入力されています")
 
     images.append(img)
-
+# imgshow(images)
 img = images[0]
-hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV_FULL)
-# imgshow(hsv)
-min = (0, 0, 0)
-max = (255, 255, 220)
-inrange = cv.inRange(hsv, min, max)
-imgshow(inrange)
+
+
+def getleft(img):
+    hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV_FULL)
+    # imgshow(hsv)
+    min = (0, 0, 0)
+    max = (255, 255, 225)
+    inrange = cv.inRange(hsv, min, max)
+    # imgshow(inrange)
+
+    # 左端の座標を保存するリスト
+    positions = []
+
+    # 画像の幅と高さ
+    h, w = inrange.shape
+
+    # 元画像(検証用)
+    tmp_img = cv.cvtColor(inrange, cv.COLOR_GRAY2BGR)
+
+    # 上から順に見ていく
+    for y in np.arange(int(h * 0.15), int(h * 0.8)):
+        findBlack = False
+        # 左(一番左は飛ばす)から順に見ていく
+        for x in np.arange(int(w * 0.2), int(w * 0.3)):
+            # Windows版ではWindow枠があると、即黒を検知してしまうので、
+            # 「一度白を見つけた後に、黒を見つけたら」という条件にする
+            if (not findBlack) & (inrange[y, x] == BLACK):
+                findBlack = True
+            elif (findBlack) & (inrange[y, x] == WHITE):
+                positions.append(x)
+                # 元画像(検証用)に検出点を赤で色付け
+                cv.line(
+                    tmp_img,
+                    pt1=(x, y),
+                    pt2=(x, y),
+                    color=(0, 0, 255),
+                    thickness=3,
+                )
+                break
+
+    c = collections.Counter(positions)
+
+    # リストから一番多い出現回数の値(座標)を取得
+    margin_left = c.most_common(1)[0][0]
+    # imgshow(tmp_img)
+    return margin_left
+
+
+def getright(img):
+    hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV_FULL)
+    # imgshow(hsv)
+    min = (0, 0, 0)
+    max = (255, 255, 225)
+    inrange = cv.inRange(hsv, min, max)
+    # imgshow(inrange)
+
+    # imgshow(tmp_img)
+    # 左端の座標を保存するリスト
+    positions = []
+
+    # 画像の幅と高さ
+    h, w = inrange.shape
+
+    # 元画像(検証用)
+    tmp_img = cv.cvtColor(inrange, cv.COLOR_GRAY2BGR)
+
+    # 上から順に見ていく
+    for y in np.arange(int(h * 0.15), int(h * 0.8)):
+        findBlack = False
+        # 左(一番左は飛ばす)から順に見ていく
+        for x in np.arange(int(w * 0.95), int(w * 0.9), -1):
+            # Windows版ではWindow枠があると、即黒を検知してしまうので、
+            # 「一度白を見つけた後に、黒を見つけたら」という条件にする
+            if (not findBlack) & (inrange[y, x] == BLACK):
+                findBlack = True
+            elif (findBlack) & (inrange[y, x] == WHITE):
+                positions.append(x)
+                # 元画像(検証用)に検出点を赤で色付け
+                cv.line(
+                    tmp_img,
+                    pt1=(x, y),
+                    pt2=(x, y),
+                    color=(0, 0, 255),
+                    thickness=3,
+                )
+                break
+
+    c = collections.Counter(positions)
+
+    # リストから一番多い出現回数の値(座標)を取得
+    margin_right = c.most_common(1)[0][0]
+    # imgshow(tmp_img)
+    return margin_right
+
+
+def getbelow(img, margin_left, margin_right):
+    hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV_FULL)
+    # imgshow(hsv)
+    min = (0, 0, 0)
+    max = (255, 255, 225)
+    inrange = cv.inRange(hsv, min, max)
+
+    # 元画像(検証用)
+    tmp_img = cv.cvtColor(inrange, cv.COLOR_GRAY2BGR)
+    # 画像の幅と高さ
+    h, w = inrange.shape
+    positions = []
+    for x in np.arange(margin_left, margin_right):
+        for y in np.arange(int(h * 0.95), int(h * 0.71), -1):
+            # 左(一番左は飛ばす)から順に見ていく
+            # Windows版ではWindow枠があると、即黒を検知してしまうので、
+            # 「一度白を見つけた後に、黒を見つけたら」という条件にする
+            if inrange[y, x] == BLACK:
+                positions.append(y)
+                # 元画像(検証用)に検出点を赤で色付け
+                cv.line(
+                    tmp_img,
+                    pt1=(x, y),
+                    pt2=(x, y),
+                    color=(0, 0, 255),
+                    thickness=3,
+                )
+                break
+    c = collections.Counter(positions)
+    # リストから一番多い出現回数の値(座標)を取得
+    margin_bottom = c.most_common(1)[0][0]
+    # print("検出されたY座標と回数")
+    # print(c.most_common(5))
+    # imgshow(tmp_img)
+    return margin_bottom
+
+
+def show_rect(img):
+    hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV_FULL)
+    # imgshow(hsv)
+    min = (0, 0, 0)
+    max = (255, 255, 225)
+    inrange = cv.inRange(hsv, min, max)
+    # 目安として探索する範囲緑枠で表示
+    tmp_img = cv.cvtColor(inrange, cv.COLOR_GRAY2BGR)
+    cv.rectangle(
+        tmp_img,
+        pt1=(int(tmp_img.shape[1] * 0.2), int(tmp_img.shape[0] * 0.15)),
+        pt2=(int(tmp_img.shape[1] * 0.3), int(tmp_img.shape[0] * 0.8)),
+        color=(0, 255, 0),
+        thickness=3,
+    )
+    cv.rectangle(
+        tmp_img,
+        pt1=(int(tmp_img.shape[1] * 0.9), int(tmp_img.shape[0] * 0.15)),
+        pt2=(int(tmp_img.shape[1] * 0.95), int(tmp_img.shape[0] * 0.8)),
+        color=(0, 255, 0),
+        thickness=3,
+    )
+    cv.rectangle(
+        tmp_img,
+        pt1=(margin_left, int(tmp_img.shape[0] * 0.71)),
+        pt2=(margin_right, int(tmp_img.shape[0] * 0.95)),
+        color=(0, 255, 0),
+        thickness=3,
+    )
+    cv.rectangle(
+        tmp_img,
+        pt1=(margin_left, 0),
+        pt2=(margin_right, margin_bottom),
+        color=(0, 0, 255),
+        thickness=2,
+    )
+    imgshow(tmp_img)
+
+
+# getleft(img)
+margin_left = getleft(img)
+margin_right = getright(img)
+margin_bottom = getbelow(img, margin_left, margin_right)
+print(margin_left, " ", margin_right, " ", margin_bottom)
+# show_rect(img)
+
+tmp_img = images[0].copy()
+
+# スキル1行分の高さ
+skill_height = int(tmp_img.shape[0] * 0.18)
+
+# ↑の赤枠の幅を95%程度にすると丁度良くなる
+skill_left = margin_left + int((margin_right - margin_left) * 0.02)
+skill_right = margin_left + int((margin_right - margin_left) * 0.98)
+cv.rectangle(
+    tmp_img,
+    pt1=(skill_left, margin_bottom - skill_height),
+    pt2=(skill_right, margin_bottom),
+    color=(0, 0, 255),
+    thickness=2,
+)
+# imgshow(tmp_img)
+
+img = images[0].copy()
+skill_img = img[margin_bottom -
+                skill_height: margin_bottom, margin_left: skill_right]
+# サンプルの画像が悪くてごめんなさい…
+imgshow(skill_img)
