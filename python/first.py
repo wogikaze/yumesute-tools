@@ -2,7 +2,6 @@ import collections
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
-from enum import IntEnum, auto
 
 
 # 画像表示関数
@@ -33,11 +32,6 @@ def imgshow(src):
 
     plt.show()
 
-
-# 画像結合関数
-class SimpleMergeLayout(IntEnum):
-    Vertical = auto()
-    Horizontal = auto()
 
 BLACK = 0
 WHITE = 255
