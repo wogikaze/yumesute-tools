@@ -39,53 +39,6 @@ class SimpleMergeLayout(IntEnum):
     Vertical = auto()
     Horizontal = auto()
 
-
-def simple_merge(images: list, layout: SimpleMergeLayout):
-    x = 0
-    y = 0
-
-    if (layout != SimpleMergeLayout.Vertical) & (
-        layout != SimpleMergeLayout.Horizontal
-    ):
-        return
-
-    if layout == SimpleMergeLayout.Vertical:
-        # 縦結合の場合
-        width = max(m.shape[1] for m in images)
-        height = sum(m.shape[0] for m in images)
-    elif layout == SimpleMergeLayout.Horizontal:
-        # 縦結合の場合
-        width = sum(m.shape[1] for m in images)
-        height = max(m.shape[0] for m in images)
-
-    output_img = np.zeros((height, width, 4), dtype=np.uint8)
-    for img in images:
-        # 入力画像がBGRAになるよう色空間を変更
-        # グレースケール
-        if img.ndim == 2:
-            merge_img = cv.cvtColor(img, cv.COLOR_GRAY2BGRA)
-        # BGR
-        elif img.shape[2] == 3:
-            merge_img = cv.cvtColor(img, cv.COLOR_BGR2BGRA)
-        # BGRA
-        elif img.shape[2] == 4:
-            merge_img = img
-
-        if layout == SimpleMergeLayout.Vertical:
-            # 縦結合の場合
-            output_img[
-                y : y + merge_img.shape[0], 0 : merge_img.shape[1]
-            ] = merge_img
-            y += merge_img.shape[0]
-        elif layout == SimpleMergeLayout.Horizontal:
-            # 横結合の場合
-            output_img[
-                0 : merge_img.shape[0], x : x + merge_img.shape[1]
-            ] = merge_img
-            x += merge_img.shape[1]
-    return output_img
-
-
 BLACK = 0
 WHITE = 255
 # 結合対象画像をlistへ格納
