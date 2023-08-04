@@ -1,9 +1,27 @@
-# 結合した画像をクリップする
+# 結合した画像をクリップしてレベルを読み取る
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
 from PIL import Image
 import pyocr
+
+
+def main():
+    items = get_items()
+
+    # text = recognize(arr)
+    # print(text)
+    # items[item].save(f"../img/item_{item}.png")
+    for i in range(40, 54):  # 7, 11,32
+        img = items[i]
+
+        img_arr = optimize(img)
+        dil_img = cv.dilate(img_arr, np.ones((2, 2)), iterations=1)
+        ero_img = cv.erode(dil_img, np.ones((2, 2)), iterations=1)
+        # imgshow(ero_img)
+
+        text = recognize(Image.fromarray(ero_img))
+        print(text)
 
 
 def imgshow(src):
@@ -52,7 +70,7 @@ def get_items():
 
 
 def optimize(image):
-    border = 200  # 180<<<200<= <<<220
+    border = 190  # 180<<<200<= <<<220
     arr = np.array(image)
 
     for i in range(len(arr)):
@@ -66,11 +84,8 @@ def optimize(image):
                 pix[0] >= border or pix[1] >= border or pix[2] >= border
             ):  # 白文字は黒に
                 arr[i][j] = [255, 255, 255]
-    arr = cv.resize(arr, (int(arr.shape[0] * 4), int(arr.shape[1] * 4)))
-
-
-    # imgshow(arr[153 * 4 : len(arr), 42 * 4 : 85 * 4])
-    return Image.fromarray(arr)
+    # imgshow(arr)
+    return arr
 
 
 def recognize(image):
@@ -84,9 +99,5 @@ def recognize(image):
     )
 
 
-items = get_items()
-for item in range(54):  # 1,7,27, 40
-    arr = optimize(items[item])
-    # text = recognize(arr)
-    # print(text)
-    items[item].save(f"../img/item_{item}.png")
+if __name__ == "__main__":
+    main()
