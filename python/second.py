@@ -1,10 +1,8 @@
-import collections
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
 from PIL import Image
 import pyocr
-import os
 
 
 def imgshow(src):
@@ -53,12 +51,13 @@ def get_items():
 
 
 def optimize(image):
-    border = 220    #220
+    border = 200  # 180<<<200<= <<<220
     arr = np.array(image)
+
     for i in range(len(arr)):
         for j in range(len(arr[i])):
             pix = arr[i][j]
-            if j < 42 or i < 150 or j > 80:  # 数字以外の座標
+            if j < 42 or i < 153 or j > 80:  # 数字以外の座標
                 arr[i][j] = [0, 0, 0]
             elif pix[0] < border or pix[1] < border or pix[2] < border:
                 arr[i][j] = [0, 0, 0]
@@ -66,19 +65,11 @@ def optimize(image):
                 pix[0] >= border or pix[1] >= border or pix[2] >= border
             ):  # 白文字は黒に
                 arr[i][j] = [255, 255, 255]
+    arr = cv.resize(arr, (int(arr.shape[0] * 4), int(arr.shape[1] * 4)))
+    dilation = cv.dilate(arr,kernel,iterations = 1)
 
-    # Convert the image to grayscale (assuming it's a 3-channel RGB image)
-    gray_image = cv.cvtColor(arr, cv.COLOR_RGB2GRAY)
-
-    # Perform thinning using the cv2.ximgproc.thinning function
-    thinned_image = cv.ximgproc.thinning(
-        gray_image, cv.ximgproc.THINNING_GUOHALL
-    )
-    # Convert the thinned grayscale image back to RGB
-    thinned_rgb = cv.cvtColor(thinned_image, cv.COLOR_GRAY2RGB)
-    plt.imshow(thinned_rgb)
-    plt.show()
-    return Image.fromarray(arr)
+    imgshow(arr[153 * 4 : len(arr), 42 * 4 : 85 * 4])
+    return Image.fromarray(arr[153 * 4 : len(arr), 42 * 4 : 85 * 4])
 
 
 def recognize(image):
@@ -93,7 +84,7 @@ def recognize(image):
 
 
 items = get_items()
-for item in [40]:
+for item in range(2):  # 1,7,27, 40
     arr = optimize(items[item])
     text = recognize(arr)
     print(text)
