@@ -7,16 +7,16 @@ import pyocr
 
 
 def main():
-    tools = pyocr.get_available_tools()  # 利用可能なOCRエンジンを取得
-    tool = tools[0]  # インストールしたTesseractを利用
+    for i in range(40, 54):  # 7, 11,32
+        img = cv2.imread(f"../img/item_{i}.png")
 
-    img = cv2.imread("../img/item_0.png")
-    img_arr = optimize(img)
+        img_arr = optimize(img)
+        dil_img = cv2.dilate(img_arr, np.ones((2, 2)), iterations=1)
+        ero_img = cv2.erode(dil_img, np.ones((2, 2)), iterations=1)
+        # imgshow(ero_img)
 
-    imgshow(img[153 : len(img), 42:85])
-
-    text = recognize(img_arr)
-    print(text)
+        text = recognize(Image.fromarray(ero_img))
+        print(text)
 
 
 def recognize(image):
@@ -59,22 +59,21 @@ def imgshow(src):
 
 
 def optimize(image):
-    border = 220
+    border = 190  # 180<<<200<= <<<220
     arr = np.array(image)
-    print(len(arr), len(arr[0]))
+
     for i in range(len(arr)):
         for j in range(len(arr[i])):
             pix = arr[i][j]
-            if i < 130 or j < 90 or i > 150 or j > 150:  # 数字以外の座標
-                arr[i][j] = [255, 255, 255]
-            elif (
-                pix[0] < border or pix[1] < border or pix[2] < border
-            ):  # 暗めの色は白に
-                arr[i][j] = [255, 255, 255]
+            if j < 42 or i < 153 or j > 80:  # 数字以外の座標
+                arr[i][j] = [0, 0, 0]
+            elif pix[0] < border or pix[1] < border or pix[2] < border:
+                arr[i][j] = [0, 0, 0]
             elif (
                 pix[0] >= border or pix[1] >= border or pix[2] >= border
             ):  # 白文字は黒に
-                arr[i][j] = [0, 0, 0]
+                arr[i][j] = [255, 255, 255]
+    # imgshow(arr)
     return arr
 
 
