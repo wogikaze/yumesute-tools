@@ -1,3 +1,4 @@
+# 中央の部分を取り出し結合する
 import collections
 import matplotlib.pyplot as plt
 import numpy as np

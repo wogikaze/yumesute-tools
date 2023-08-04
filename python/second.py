@@ -1,3 +1,4 @@
+# 結合した画像をクリップする
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
@@ -40,7 +41,7 @@ def get_items():
     gap_x, gap_y = 16, 35
     items = []
     x, y = start_x, start_y
-    while y + item_size + gap_y < stash.height:
+    while y + item_size < stash.height:
         while x + item_size + gap_x < stash.width:
             cropped_image = stash.crop((x, y, x + item_size, y + item_size))
             items.append(cropped_image)
@@ -66,10 +67,10 @@ def optimize(image):
             ):  # 白文字は黒に
                 arr[i][j] = [255, 255, 255]
     arr = cv.resize(arr, (int(arr.shape[0] * 4), int(arr.shape[1] * 4)))
-    dilation = cv.dilate(arr,kernel,iterations = 1)
 
-    imgshow(arr[153 * 4 : len(arr), 42 * 4 : 85 * 4])
-    return Image.fromarray(arr[153 * 4 : len(arr), 42 * 4 : 85 * 4])
+
+    # imgshow(arr[153 * 4 : len(arr), 42 * 4 : 85 * 4])
+    return Image.fromarray(arr)
 
 
 def recognize(image):
@@ -84,7 +85,8 @@ def recognize(image):
 
 
 items = get_items()
-for item in range(2):  # 1,7,27, 40
+for item in range(54):  # 1,7,27, 40
     arr = optimize(items[item])
-    text = recognize(arr)
-    print(text)
+    # text = recognize(arr)
+    # print(text)
+    items[item].save(f"../img/item_{item}.png")
