@@ -40,7 +40,7 @@ WHITE = 255
 images = []
 
 for i in np.arange(3):
-    img = cv.imread(f"../img/{i + 1}.jpg", cv.IMREAD_COLOR)
+    img = cv.imread(f"../img/{i + 4}.jpg", cv.IMREAD_COLOR)
     print(f"{i + 1}枚目 : {img.shape[1]}px x {img.shape[0]}px")
     if i > 0:
         # 2枚目以降は解像度違ったらエラー

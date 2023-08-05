@@ -11,9 +11,9 @@ def main():
 
     # text = recognize(arr)
     # print(text)
-    # items[item].save(f"../img/item_{item}.png")
-    for i in range(40, 54):  # 7, 11,32
+    for i in range(0, 54):  # 7, 11,32
         img = items[i]
+        img.save(f"../img/item_{i}.png")
 
         img_arr = optimize(img)
         dil_img = cv.dilate(img_arr, np.ones((2, 2)), iterations=1)
@@ -56,7 +56,7 @@ def get_items():
     stash = Image.open("./vertical.png")
     item_size = 185
     start_x, start_y = 32, 200
-    gap_x, gap_y = 16, 35
+    gap_x, gap_y = 15, 35
     items = []
     x, y = start_x, start_y
     while y + item_size < stash.height:
