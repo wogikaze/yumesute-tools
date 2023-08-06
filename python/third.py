@@ -5,41 +5,48 @@ import cv2 as cv
 from PIL import Image
 import pyocr
 
-
 def main():
-    for i in [1]:  # 7, 11,32
-        # img = cv.imread(f"../img/item_{i}.png")
-        img = cv.imread("./vertical.png")
-        # plt.imshow(img[50:90, 0:45])
-        # plt.show()
-        # imgshow(img[49:91, 3:45])
-        match(img)
-        # cv.imwrite("t_4.png", img[50:90, 0:45])
-
+    for i in [4]:  # 7, 11,32
+        img = cv.imread(f"img/item_{i}.png")    #アクターアイコン
+        
+        ft = match(img)     #才能開花の数を返す
+        print(ft)
 
 def match(img):
-    # 画像の読み込み + グレースケール化
-    img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    best_match = None  # 最も類似度の高いテンプレート番号を保存する変数
+    best_score = 0.0   # 最も類似度の高いスコアを保存する変数
 
-    template = cv.imread("./t_1.png")
-    template_gray = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
+    for i in range(6): #0,1,2,3,4,5
+        img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY) #グレイスケール
 
-    # 処理対象画像に対して、テンプレート画像との類似度を算出する
-    res = cv.matchTemplate(img_gray, template_gray, cv.TM_CCOEFF_NORMED)
+        template = cv.imread(f"python/t_{i}.png", 0)  # テンプレート画像をグレースケールで読み込み
+        res = cv.matchTemplate(img_gray, template, cv.TM_CCOEFF_NORMED)
 
-    # 類似度の高い部分を検出する
-    threshold = 0.8
-    loc = np.where(res >= threshold)
+        max_score = np.max(res)
+        print(max_score)
+        if max_score > best_score:
+            best_match = i
+            best_score = max_score
 
-    # テンプレートマッチング画像の高さ、幅を取得する
-    h, w = template_gray.shape
+    return best_match
 
-    # 検出した部分に赤枠をつける
-    for pt in zip(*loc[::-1]):
-        cv.rectangle(img, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
+def make_mask(template):
+    # 全て白のマスクを作成
+    mask = np.ones(template.shape, dtype=np.uint8) * 255
 
-    imgshow(img)
+    # 中心を原点とした座標系を作成
+    center = np.array(template.shape) / 2.0
+    Y, X = np.indices(template.shape)
+   # 中心からのマンハッタン距離を計算
+    manhattan_distance = np.abs(X - center[1]) + np.abs(Y - center[0])
 
+    # sizeを計算
+    size = template.shape[0] / np.sqrt(2)**2
+
+    # |x| + |y| = size の範囲外を黒にする
+    mask[manhattan_distance > size] = 0
+    # imgshow(mask)
+    return mask
 
 def imgshow(src):
     # 複数枚
