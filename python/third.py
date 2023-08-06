@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
 from PIL import Image
-import pyocr
 
 def main():
     for i in [4]:  # 7, 11,32
@@ -19,7 +18,7 @@ def match(img):
     for i in range(6): #0,1,2,3,4,5
         img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY) #グレイスケール
 
-        template = cv.imread(f"python/t_{i}.png", 0)  # テンプレート画像をグレースケールで読み込み
+        template = cv.imread(f"img/t_{i}.png", 0)  # テンプレート画像をグレースケールで読み込み
         res = cv.matchTemplate(img_gray, template, cv.TM_CCOEFF_NORMED)
 
         max_score = np.max(res)
